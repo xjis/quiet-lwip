@@ -14,7 +14,10 @@ else()
     endif()
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wpedantic -Werror -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wpedantic -Wall")
+if (NOT APPLE)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_XOPEN_SOURCE=700")
+endif()
 set(SRCFILES src/driver.c src/util.c)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -24,13 +27,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_subdirectory(src/lwip)
 
-set(CORE_DEPENDENCIES quiet)
+set(CORE_DEPENDENCIES quiet pthread)
 
 find_library(PORTAUDIO portaudio)
 if (PORTAUDIO)
   set(SRCFILES ${SRCFILES} src/driver_portaudio.c)
   add_definitions(-DQUIET_PORTAUDIO=1)
-  set(CORE_DEPENDENCIES ${CORE_DEPENDENCIES} PORTAUDIO)
+  set(CORE_DEPENDENCIES ${CORE_DEPENDENCIES} portaudio)
   add_custom_target(quiet-lwip-portaudio-h ALL COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/include/quiet-lwip-portaudio.h ${CMAKE_BINARY_DIR}/include/quiet-lwip-portaudio.h)
 
 else()
